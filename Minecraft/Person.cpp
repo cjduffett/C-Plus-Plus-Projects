@@ -1,8 +1,8 @@
 // EC 327: Introduction to Software Engineering
-// Programming Assignment 4
+// Programming Assignment 5
 //
 // Carlton Duffett
-// November 24, 2013
+// December 11, 2013
 //
 // Person.cpp
 
@@ -10,8 +10,11 @@
 #include "Cart_Vector.h"
 #include "Game_Object.h"
 #include "Person.h"
+#include "Model.h"
 #include <iostream>
 #include <cmath>
+#include <fstream>
+#include <cctype>
 
 using namespace std;
 
@@ -33,11 +36,12 @@ Person::Person()
 
 // Person()
 //-----------------------------------------	
-// initialize only with display_code
+// restore constructor
 
-Person::Person(char in_code)
-	:Game_Object(in_code)
+Person::Person(char in_code, int in_id)
+	:Game_Object(in_code, in_id)
 {
+	// restore from file
 	health = 5;
 	speed = 5;
 	cout << "    Person constructed." << endl;
@@ -91,15 +95,6 @@ void Person::start_moving(Cart_Point dest)
 	}
 }
 
-// Person_start_mining()
-//-----------------------------------------	
-// print message, Person cannot work a mine
-
-void Person::start_mining(Gold_Mine *g, Town_Hall *t)
-{
-	cout << "Sorry, I can't work a mine." << endl;
-}
-
 // Person.stop()
 //-----------------------------------------	
 // stop moving Person
@@ -117,6 +112,8 @@ void Person::stop()
 	}
 	else
 	{
+		state = 's';
+		delta = Cart_Vector(0,0);
 		cout << display_code << get_id() << ": I am dead. The dead cannot be stopped!" << endl;
 	}
 }
@@ -129,8 +126,11 @@ void Person::show_status()
 {
 	Game_Object::show_status();
 
-	cout << "moving at speed of " << speed << " to " << destination
-		 << " at each step of " << delta;
+	if (state == 'm' || state == 'o' || state == 'r' || state == 'i')
+	{
+		cout << "moving at speed of " << speed << " to " << destination
+			 << " at each step of " << delta;
+	}
 
 	if (state != 'x')	 
 		cout << endl << "    Health " << health << "." << endl;
@@ -154,19 +154,79 @@ bool Person::is_alive()
 //-----------------------------------------	
 // decrement health of Person until death
 
-void Person::take_hit(int attack_strength)
+void Person::take_hit(int attack_strength, Person *attacker_ptr)
 {
 	health -= attack_strength;
+
+	if (health < 3)
+	{
+		display_code = tolower(display_code);
+	}
 
 	if (health <= 0)
 	{
 		state = 'x';
-		cout << "Ahhhh, I am dying!" << endl;
+		cout << display_code << get_id() << ": Ahhhh, I am dying!" << endl;
 	}
 	else
 	{
-		cout << "Ouch!" << endl;
+		cout << display_code << get_id() << ": Ouch!" << endl;
 	}
+}
+
+// Person.save()
+//-----------------------------------------	
+// save the state of all member variables
+
+int Person::get_health()
+{
+	return health;
+}
+
+// Person.save()
+//-----------------------------------------	
+// save the state of all member variables
+
+void Person::save(ofstream &file)
+{
+	Game_Object::save(file);
+
+	// write health, speed
+	file << health << endl << speed << endl;
+
+	// write destination (x,y) and delta <x,y> components
+	file << destination.x << endl << destination.y << endl;
+	file << delta.x << endl << delta.y << endl;
+}
+
+// .restore()
+//-----------------------------------------	
+// restore the state of all member variables
+
+void Person::restore(ifstream &file, Model &model)
+{
+	Game_Object::restore(file, model);
+
+	// restore member variables
+
+	// health and speed
+	file >> health;
+	file >> speed;
+
+	// destination and delta
+	file >> destination.x;
+	file >> destination.y;
+	file >> delta.x;
+	file >> delta.y;
+}
+
+// Person_start_mining()
+//-----------------------------------------	
+// print message, Person cannot work a mine
+
+void Person::start_mining(Gold_Mine *g, Town_Hall *t)
+{
+	cout << "Sorry, I can't work a mine." << endl;
 }
 
 // Person.start_attack()
@@ -175,7 +235,16 @@ void Person::take_hit(int attack_strength)
 
 void Person::start_attack(Person *target)
 {
-	cout << "I can't attack." << endl;
+	cout << "Sorry, I can't attack." << endl;
+}
+
+// Person.start_inspecting()
+//-----------------------------------------	
+// print message, Person cannot inspect
+
+void Person::start_inspecting(Model &model)
+{
+	cout << "Sorry, I can't inspect." << endl;
 }
 
 /*****************************************************************/
@@ -190,10 +259,11 @@ void Person::start_attack(Person *target)
 bool Person::update_location()
 {
 	// if within one step of destination
-	if (fabs(destination.x - location.x) <= fabs(delta.x)
+	if ((fabs(destination.x - location.x) <= fabs(delta.x)
 		&& fabs(destination.y - location.y) <= fabs(delta.y))
+		|| location == destination)
 	{
-		cout << display_code << get_id() << ": Im there!" << endl;
+		cout << display_code << get_id() << ": I'm there!" << endl;
 		location = destination; // update location
 		delta = Cart_Vector(0,0);
 		return true;

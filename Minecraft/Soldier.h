@@ -1,8 +1,8 @@
 // EC 327: Introduction to Software Engineering
-// Programming Assignment 4
+// Programming Assignment 5
 //
 // Carlton Duffett
-// November 24, 2013
+// December 11, 2013
 //
 // Soldier.h
 
@@ -11,6 +11,10 @@
 
 #include "Cart_Point.h"
 #include "Person.h"
+#include <fstream>
+
+// forward declaration of Model
+class Model;
 
 using namespace std;
 
@@ -20,6 +24,7 @@ class Soldier:public Person
 
 	// constructors:
 	Soldier();
+	Soldier(int);
 	Soldier(int, Cart_Point);
 	~Soldier();
 
@@ -27,6 +32,9 @@ class Soldier:public Person
 	void start_attack(Person *);
 	bool update();
 	void show_status();
+	void take_hit(int, Person *);
+	void save(ofstream &);
+	void restore(ifstream &, Model &);
 
 	private:
 

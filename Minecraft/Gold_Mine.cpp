@@ -1,15 +1,17 @@
 // EC 327: Introduction to Software Engineering
-// Programming Assignment 4
+// Programming Assignment 5
 //
 // Carlton Duffett
-// November 24, 2013
+// December 11, 2013
 //
 // Gold_Mine.cpp
 
-#include <iostream>
 #include "Game_Object.h"
 #include "Gold_Mine.h"
 #include "Cart_Point.h"
+#include "Model.h"
+#include <iostream>
+#include <fstream>
 
 using namespace std;
 	
@@ -22,12 +24,27 @@ using namespace std;
 // default constructor
 
 Gold_Mine::Gold_Mine()
-	:Game_Object('G')
+	:Game_Object('G',0)
 {
 	state = 'f'; // Gold_Mine is "full of gold"
 	amount = 100;
 	
 	cout << "    Gold_Mine default constructed." << endl;
+}
+
+
+// Gold_Mine()
+//-----------------------------------------
+// restore constructor
+
+Gold_Mine::Gold_Mine(char in_code, int in_id)
+	:Game_Object(in_code, in_id)
+{
+	// restore from file
+	state = 'f';
+	amount = 100;
+
+	cout << "    Gold_Mine constructed." << endl;
 }
 
 // Gold_Mine()
@@ -115,3 +132,37 @@ void Gold_Mine::show_status()
 	Game_Object::show_status();
 	cout << " Contains " << amount << "." << endl;
 }
+
+// Gold_Mine.get_gold_amount()
+//-----------------------------------------	
+// return the amount of gold currently in the mine
+
+double Gold_Mine::get_gold_amount()
+{
+	return amount;
+}
+
+// Gold_Mine.save()
+//-----------------------------------------	
+// save the state of all member variables
+
+void Gold_Mine::save(ofstream &file)
+{
+	Game_Object::save(file);
+
+	// write amount
+	file << amount << endl;
+}
+
+// .restore()
+//-----------------------------------------	
+// restore the state of all member variables
+
+void Gold_Mine::restore(ifstream &file, Model &model)
+{
+	Game_Object::restore(file, model);
+
+	// restore member variables
+	file >> amount;
+}
+

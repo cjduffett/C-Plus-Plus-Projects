@@ -1,16 +1,19 @@
 // EC 327: Introduction to Software Engineering
-// Programming Assignment 4
+// Programming Assignment 5
 //
 // Carlton Duffett
-// November 24, 2013
+// December 11, 2013
 //
 // Soldier.cpp
 
 #include "Cart_Point.h"
 #include "Person.h"
 #include "Soldier.h"
+#include "Model.h"
 #include <cmath>
 #include <iostream>
+#include <fstream>
+#include <cctype>
 
 using namespace std;
 
@@ -23,12 +26,26 @@ using namespace std;
 // default constructor, initialize only with display_code
 
 Soldier::Soldier()
-	:Person('S')
+	:Person('S', 0)
 {
 	attack_strength = 2;
 	range = 2.0;
 	target = NULL;
 	cout << "   Soldier default constructed." << endl;
+}
+
+// Soldier()
+//-----------------------------------------	
+// restore constructor
+
+Soldier::Soldier(int in_id)
+	:Person('S', in_id)
+{
+	// restore from file
+	attack_strength = 2;
+	range = 2.0;
+	target = NULL;
+	cout << "    Soldier constructed." << endl;
 }
 
 // Soldier()
@@ -84,7 +101,7 @@ void Soldier::start_attack(Person *in_target)
 				state = 'a'; // attack
 			}
 			else
-				cout << "Target is out of range." << endl;
+				cout << display_code << get_id() << ": Target is out of range." << endl;
 		}
 	}
 	else
@@ -119,22 +136,28 @@ bool Soldier::update()
 		{
 			// check distance to target
 			Cart_Point target_location = target->get_location();
-			double dist_to_target = cart_distance(target_location, location);
+			double dist_to_target = cart_distance(location, target_location);
 
-			if (dist_to_target <= range)
+			if (dist_to_target <= range) // target is still in range
 			{
 				if (target->is_alive())
 				{
-					cout << "Take that!" << endl;
-					target->take_hit(attack_strength);
-					return false;
+					cout << display_code << get_id() << ": Take that!" << endl;
+					target->take_hit(attack_strength, this); // "this" soldier
+ 					return false;
 				}
 				else
 				{
-					cout << "I win!" << endl;
+					cout << display_code << get_id() << ": I win!" << endl;
 					state = 's';
 					return true;
 				}
+			}
+			else // target is no longer in range
+			{
+				cout << display_code << get_id() << ": Target is out of range." << endl;
+				state = 's';
+				return true;
 			}
 			break;
 		}
@@ -152,20 +175,71 @@ void Soldier::show_status()
 {
 	cout << "Soldier status: ";
 	Person::show_status();
-	cout << "    ";
 	
 	switch (state)
 	{
 		case 's': // stopped
-			cout << "Stopped." << endl;
+			cout << "    Stopped." << endl;
 			break;
 				
 		case 'm': // moving to a destination
-			cout << "Moving at speed." << endl;
+			cout << "    Moving at speed." << endl;
 			break;
 				
 		case 'a':
-			cout << "Attacking." << endl;
+			cout << "    Attacking." << endl;
 			break;
 	}
+}
+
+// Soldier.take_hit()
+//-----------------------------------------	
+// attack the Person that is attacking
+
+void Soldier::take_hit(int attack_strength, Person *attacker_ptr)
+{
+	Person::take_hit(attack_strength, attacker_ptr);
+
+	// begin attacking attacker
+	start_attack(attacker_ptr);
+}
+
+// Soldier.save()
+//-----------------------------------------	
+// save the state of all member variables
+
+void Soldier::save(ofstream &file)
+{
+	Person::save(file);
+
+	// write attack_strength, range
+	file << attack_strength << endl << range << endl;
+
+	// write target pointer
+	if (target == 0)
+		file << -1 << endl;
+	else
+		file << target->get_id() << endl;
+}
+
+// .restore()
+//-----------------------------------------	
+// restore the state of all member variables
+
+void Soldier::restore(ifstream &file, Model &model)
+{
+	Person::restore(file, model);
+
+	// restore member variables
+	file >> attack_strength;
+	file >> range;
+
+	// restore target pointer
+	int target_id;
+	file >> target_id;
+
+	if (target_id == -1)
+		target = 0;
+	else
+		target = model.get_Person_ptr(target_id);
 }

@@ -1,8 +1,8 @@
 // EC 327: Introduction to Software Engineering
-// Programming Assignment 4
+// Programming Assignment 5
 //
 // Carlton Duffett
-// November 24, 2013
+// December 11, 2013
 //
 // Miner.cpp
 
@@ -12,7 +12,9 @@
 #include "Miner.h"
 #include "Gold_Mine.h"
 #include "Town_Hall.h"
+#include "Model.h"
 #include <iostream>
+#include <fstream>
 
 using namespace std;
 
@@ -25,12 +27,26 @@ using namespace std;
 // default constructor
 
 Miner::Miner()
-	:Person('M') // display_code 'M'
+	:Person('M', 0) // display_code 'M'
 {
 	amount = 0;
 	mine = NULL;
 	home = NULL;
 	cout << "    Miner default constructed." << endl;
+}
+
+// Miner()
+//-----------------------------------------	
+// restore constructor
+
+Miner::Miner(int in_id)
+	:Person('M', in_id)
+{
+	// restore from file
+	amount = 0;
+	mine = NULL;
+	home = NULL;
+	cout << "    Miner constructed." << endl;
 }
 
 // Miner()
@@ -181,32 +197,114 @@ void Miner::show_status()
 {
 	cout << "Miner status: ";
 	Person::show_status();
-	cout << "    ";
-	
+
 	switch (state)
 	{
 		case 's': // stopped
-			cout << "Stopped." << endl;
+			cout << "    Stopped." << endl;
 			break;
 				
 		case 'm': // moving to a destination
-			cout << "Moving at speed." << endl;
+			cout << "    Moving at speed." << endl;
 			break;
 				
 		case 'o': // outbound mining
-			cout << "Outbound to a mine." << endl;
+			cout << "    Outbound to a mine." << endl;
 			break;
 				
 		case 'g': // getting gold
-			cout << "Getting gold from mine." << endl;
+			cout << "    Getting gold from mine." << endl;
 			break;
 				
 		case 'i': // inbound mining
-			cout << "Inbound to home with load: " << amount << endl;
+			cout << "    Inbound to home with load: " << amount << endl;
 			break;
 				
 		case 'd': // depositing gold
-			cout << "Depositing gold." << endl;
+			cout << "    Depositing gold." << endl;
 			break;
 	}
+}
+
+// Miner.take_hit()
+//-----------------------------------------	
+// run away from the attacker
+
+void Miner::take_hit(int attack_strength, Person *attacker_ptr)
+{
+	Person::take_hit(attack_strength, attacker_ptr);
+
+	if (get_health() > 0)
+	{
+		// calculate distance between person and attacker
+		Cart_Point attacker_location = attacker_ptr->get_location();
+		Cart_Vector attacker_direction = location - attacker_location;
+
+		// scale by 1.5 (in opposite direction)
+		double scale = 1.5;
+		attacker_direction = attacker_direction * scale;
+
+		// calculate location to flee to
+		Cart_Point flee_location = location + attacker_direction;
+
+		cout << display_code << get_id() << ": I dont want to fight!" << endl;
+
+		// move away from attacker
+		start_moving(flee_location);
+	}
+}
+
+// Miner.save()
+//-----------------------------------------	
+// save the state of all member variables
+
+void Miner::save(ofstream &file)
+{
+	Person::save(file);
+
+	// write amount
+	file << amount << endl;
+
+	// write pointers:
+
+	// Gold_Mine
+	if (mine == 0)
+		file << -1 << endl;
+	else
+		file << mine->get_id() << endl;
+
+	// Town_Hall
+	if (home == 0)
+		file << -1 << endl;
+	else
+		file << home->get_id() << endl;
+}
+
+// .restore()
+//-----------------------------------------	
+// restore the state of all member variables
+
+void Miner::restore(ifstream &file, Model &model)
+{
+	Person::restore(file, model);
+
+	// restore member variables
+	file >> amount;
+
+	// restore pointers:
+	int pointer_id;
+
+	file >> pointer_id; // restore Gold_Mine
+
+	if (pointer_id == -1)
+		mine = 0;
+	else
+		mine = model.get_Gold_Mine_ptr(pointer_id);
+
+	file >> pointer_id; // restore Town_Hall
+
+	if (pointer_id == -1)
+		home = 0;
+	else
+		home = model.get_Town_Hall_ptr(pointer_id);
 }

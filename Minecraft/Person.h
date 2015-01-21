@@ -1,8 +1,8 @@
 // EC 327: Introduction to Software Engineering
-// Programming Assignment 4
+// Programming Assignment 5
 //
 // Carlton Duffett
-// November 24, 2013
+// December 11, 2013
 //
 // Person.h
 
@@ -14,6 +14,10 @@
 #include "Game_Object.h"
 #include "Gold_Mine.h"
 #include "Town_Hall.h"
+#include <fstream>
+
+// forward delcaration of Model class
+class Model;
 
 using namespace std;
 
@@ -23,18 +27,22 @@ class Person:public Game_Object
 
 	// constructors:
 	Person();
-	Person(char);
+	Person(char, int);
 	Person(char, int, Cart_Point);
 	virtual ~Person();
 
 	// public member functions:
 	void start_moving(Cart_Point);
-	virtual void start_mining(Gold_Mine *, Town_Hall *);
 	void stop();
 	void show_status();
 	bool is_alive();
-	void take_hit(int);
+	int get_health();
+	void save(ofstream &);
+	void restore(ifstream &, Model &);
+	virtual void take_hit(int, Person *);
+	virtual void start_mining(Gold_Mine *, Town_Hall *);
 	virtual void start_attack(Person *);
+	virtual void start_inspecting(Model &);
 
 	protected:
 

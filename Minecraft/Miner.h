@@ -1,8 +1,8 @@
 // EC 327: Introduction to Software Engineering
-// Programming Assignment 4
+// Programming Assignment 5
 //
 // Carlton Duffett
-// November 24, 2013
+// December 11, 2013
 //
 // Miner.h
 
@@ -14,7 +14,10 @@
 #include "Person.h"
 #include "Gold_Mine.h"
 #include "Town_Hall.h"
-#include <iostream>
+#include <fstream>
+
+// forward declaration of Model
+class Model;
 
 using namespace std;
 
@@ -24,13 +27,17 @@ class Miner:public Person
 
 	// constructors:
 	Miner();
+	Miner(int);
 	Miner(int, Cart_Point);
 	~Miner();
 
-	// public member variables:
+	// public member functions:
 	bool update();
 	void start_mining(Gold_Mine *, Town_Hall *);
 	void show_status();
+	void save(ofstream &);
+	void restore(ifstream &, Model &);
+	void take_hit(int, Person *);
 
 	private:
 

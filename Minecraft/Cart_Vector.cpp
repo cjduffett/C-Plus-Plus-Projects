@@ -1,8 +1,8 @@
 // EC 327: Introduction to Software Engineering
-// Programming Assignment 4
+// Programming Assignment 5
 //
 // Carlton Duffett
-// November 24, 2013
+// December 11, 2013
 //
 // Cart_Vector.cpp
 
@@ -48,7 +48,7 @@ ostream &operator<<(ostream &out, Cart_Vector &v1)
 	out << "<" << v1.x << ", " << v1.y << ">";
 	return out;
 }
-	
+
 // multiplication operator (*)
 //-----------------------------------------
 // multiplies a Cartesian vector by a scalar

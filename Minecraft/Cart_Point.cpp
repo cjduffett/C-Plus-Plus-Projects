@@ -1,8 +1,8 @@
 // EC 327: Introduction to Software Engineering
-// Programming Assignment 4
+// Programming Assignment 5
 //
 // Carlton Duffett
-// November 24, 2013
+// December 11, 2013
 //
 // Cart_Point.cpp
 
@@ -72,6 +72,18 @@ Cart_Vector operator-(Cart_Point &p1, Cart_Point &p2)
 	double new_x = p1.x - p2.x;
 	double new_y = p1.y - p2.y;
 	return Cart_Vector(new_x, new_y);
+}
+
+// equation operator (==)
+//-----------------------------------------
+// compares two Cartesian points for equality
+
+bool operator==(Cart_Point &p1, Cart_Point& p2)
+{
+	if (p1.x == p2.x && p1.y == p2.y)
+		return true;
+	else
+		return false;
 }
 
 /*****************************************************************/

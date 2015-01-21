@@ -1,8 +1,8 @@
 // EC 327: Introduction to Software Engineering
-// Programming Assignment 4
+// Programming Assignment 5
 //
 // Carlton Duffett
-// November 24, 2013
+// December 11, 2013
 //
 // Gold_Mine.h
 
@@ -11,6 +11,10 @@
 
 #include "Cart_Point.h"
 #include "Game_Object.h"
+#include <fstream>
+
+// forward declaration of Model
+class Model;
 
 using namespace std;
 
@@ -20,6 +24,7 @@ class Gold_Mine:public Game_Object
 	
 	// constructors:
 	Gold_Mine();
+	Gold_Mine(char, int);
 	Gold_Mine(int, Cart_Point);
 	~Gold_Mine();
 	
@@ -28,6 +33,9 @@ class Gold_Mine:public Game_Object
 	double dig_gold(double amount_to_dig = 35);
 	bool update();
 	void show_status();
+	double get_gold_amount();
+	void save(ofstream &);
+	void restore(ifstream &, Model &);
 	
 	private:
 	
